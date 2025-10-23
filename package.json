@@ -9,5 +9,17 @@
     "validate:data": "node ./scripts/validate_data.js"
   },
   "author": "Aarav Mehta",
-  "license": "MIT"
+  "license": "MIT",
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/axrxvm/alkane-isomer-engine.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/axrxvm/alkane-isomer-engine/issues"
+  },
+  "homepage": "https://axrxvm.github.io/alkane-isomer-engine"
 }
