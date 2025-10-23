@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Alkane Isomer Viewer</title>
+  <link rel="stylesheet" href="src/style.css">
+  <meta name="color-scheme" content="light dark" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1>Alkane Isomer Viewer</h1>
+      <p class="subtitle">Explore structural isomers of alkanes C<sub>n</sub>H<sub>2n+2</sub></p>
+    </div>
+  </header>
+
+  <main class="container" id="main" tabindex="-1">
+    <form class="controls" id="controls" aria-label="Isomer controls" onsubmit="return false">
+      <div class="control-group">
+        <label for="carbonCount">Carbons (n)</label>
+        <div class="control-inputs">
+          <input type="number" id="carbonCount" min="1" max="20" value="5" inputmode="numeric" />
+          <input type="range" id="carbonRange" min="1" max="20" value="5" aria-label="Carbons (n)" />
+        </div>
+      </div>
+      <div class="control-group">
+        <label for="pageSize">Cards per page</label>
+        <select id="pageSize">
+          <option value="12">12</option>
+          <option value="24" selected>24</option>
+          <option value="48">48</option>
+          <option value="96">96</option>
+        </select>
+      </div>
+      <div class="control-group inline">
+        <label for="autoLoad">
+          <input type="checkbox" id="autoLoad" checked />
+          Auto-load on change
+        </label>
+      </div>
+      <div class="actions">
+        <button id="loadBtn" class="btn primary" type="button" aria-label="Load isomers">Load</button>
+        <button id="resetBtn" class="btn" type="button" aria-label="Reset controls">Reset</button>
+      </div>
+    </form>
+
+    <div id="statusBar" class="status" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <span id="progress">Choose n and load isomers.</span>
+    </div>
+
+    <section class="grid" id="isomersContainer" aria-label="Isomer cards"></section>
+
+    <nav class="pagination" id="pagination" aria-label="Pagination" hidden>
+      <button class="btn" id="firstPage" aria-label="First page">« First</button>
+      <button class="btn" id="prevPage" aria-label="Previous page">‹ Prev</button>
+      <span id="pageInfo" aria-live="polite">Page 1 of 1</span>
+      <button class="btn" id="nextPage" aria-label="Next page">Next ›</button>
+      <button class="btn" id="lastPage" aria-label="Last page">Last »</button>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <small id="dataInfo">Data files up to n = 20 available. Rendering large sets uses paging for performance.</small>
+      </div>
+      <div class="footer-right">
+        <small class="credits">Built by <a href="https://github.com/axrxvm" target="_blank" rel="noopener">axrxvm</a>
+          · <a href="https://github.com/axrxvm/alkane-isomer-engine" target="_blank" rel="noopener">Source on GitHub</a>
+          · MIT License. All rights reserved.
+        </small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="src/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "alkane-isomers-engine",
+  "version": "1.0.0",
+  "description": "Enumerate structural (unlabeled) isomers of alkanes (trees) with degree ≤ 4",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "validate:data": "node ./scripts/validate_data.js"
+  },
+  "author": "Aarav Mehta",
+  "license": "MIT"
+}

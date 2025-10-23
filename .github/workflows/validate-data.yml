@@ -1,0 +1,39 @@
+name: Validate data files
+
+on:
+  push:
+    paths:
+      - 'data/**'
+  pull_request:
+    paths:
+      - 'data/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install (no dependencies needed)
+        run: npm ci --no-audit --no-fund || true
+      - name: Determine changed data files
+        id: changed
+        run: |
+          # Find changed files in the push / PR
+          git fetch --no-tags --depth=2
+          # For PRs GitHub sets GITHUB_SHA to the merge commit; use git diff between HEAD^ and HEAD
+          CHANGED=$(git diff --name-only HEAD~1 HEAD | grep '^data/.*\.json$' || true)
+          echo "changed=$CHANGED" >> $GITHUB_OUTPUT
+      - name: Run data validator (only changed files)
+        run: |
+          if [ -z "${{ steps.changed.outputs.changed }}" ]; then
+            echo "No changed data files detected — validating all data/*.json"
+            node ./scripts/validate_data.js
+          else
+            echo "Validating changed files: ${{ steps.changed.outputs.changed }}"
+            # pass each changed path as an argument
+            node ./scripts/validate_data.js ${{ steps.changed.outputs.changed }}
+          fi
