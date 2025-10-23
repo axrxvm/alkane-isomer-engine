@@ -25,7 +25,10 @@ jobs:
           # Find changed files in the push / PR
           git fetch --no-tags --depth=2
           # For PRs GitHub sets GITHUB_SHA to the merge commit; use git diff between HEAD^ and HEAD
-          CHANGED=$(git diff --name-only HEAD~1 HEAD | grep '^data/.*\.json$' || true)
+          # Collect changed JSON files (one per line)
+          CHANGED_LINES=$(git diff --name-only HEAD~1 HEAD | grep '^data/.*\.json$' || true)
+          # Join into a single comma-separated line and escape percent signs which are special in GITHUB_OUTPUT
+          CHANGED=$(echo "$CHANGED_LINES" | tr '\n' ',' | sed 's/,$//' | sed 's/%/%%/g')
           echo "changed=$CHANGED" >> $GITHUB_OUTPUT
       - name: Run data validator (only changed files)
         run: |
