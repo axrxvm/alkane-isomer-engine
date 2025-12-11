@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
 
 function isTree(adj) {
   const n = adj.length;
@@ -41,7 +42,16 @@ function isTree(adj) {
 }
 
 function validateFile(filePath) {
-  const raw = fs.readFileSync(filePath, 'utf8');
+  let raw;
+  
+  // Handle both .json.gz and .json files
+  if (filePath.endsWith('.json.gz')) {
+    const compressed = fs.readFileSync(filePath);
+    raw = zlib.gunzipSync(compressed).toString('utf8');
+  } else {
+    raw = fs.readFileSync(filePath, 'utf8');
+  }
+  
   let arr;
   try {
     arr = JSON.parse(raw);
@@ -65,7 +75,10 @@ function main() {
       console.error('No data/ directory found');
       process.exit(1);
     }
-    targets = fs.readdirSync(dataDir).filter(f => f.endsWith('.json')).map(f => path.join(dataDir, f));
+    // Include both .json and .json.gz files
+    targets = fs.readdirSync(dataDir)
+      .filter(f => f.endsWith('.json') || f.endsWith('.json.gz'))
+      .map(f => path.join(dataDir, f));
   }
 
   let failed = false;

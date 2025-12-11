@@ -53,16 +53,21 @@ async function fileExists(path) {
   }
 }
 
-// Detect highest n available under data/ by checking files size_1..size_40 (safe upper bound)
-async function detectMaxN(upper = 40) {
-  // Check from upper down to 1 so we can stop early when found
-  for (let n = Math.min(upper, 100); n >= 1; n--) {
-    // Confirm pattern: data/size_n.json
-    // We expect relatively small files, but use HEAD to minimize transfer
+// Detect highest n available under data/ by checking files intelligently
+async function detectMaxN(upper = 25) {
+  // Start with reasonable upper bound and check downward
+  // Stop early when we find a file to avoid excessive 404s
+  const maxToCheck = Math.min(upper, 25);
+  
+  for (let n = maxToCheck; n >= 1; n--) {
+    // Check for compressed file first (more likely for n > 15), then uncompressed
     // eslint-disable-next-line no-await-in-loop
-    if (await fileExists(`data/size_${n}.json`)) {
-      return n;
-    }
+    const hasGz = await fileExists(`data/size_${n}.json.gz`);
+    if (hasGz) return n;
+    
+    // eslint-disable-next-line no-await-in-loop
+    const hasJson = await fileExists(`data/size_${n}.json`);
+    if (hasJson) return n;
   }
   return 0;
 }
@@ -94,11 +99,28 @@ async function loadIsomers(n) {
   pagination.hidden = true;
 
   try {
-    const response = await fetch(`data/size_${n}.json`);
-    if (!response.ok) throw new Error('File not found');
-    const trees = await response.json();
+    let trees;
+    
+    // Try loading compressed file first (for n > 15)
+    try {
+      const gzResponse = await fetch(`data/size_${n}.json.gz`);
+      if (gzResponse.ok) {
+        const compressed = await gzResponse.arrayBuffer();
+        const decompressed = pako.ungzip(new Uint8Array(compressed), { to: 'string' });
+        trees = JSON.parse(decompressed);
+        setStatus(`Loaded ${trees.length} isomers for C${n}H${2*n+2} (compressed)`);
+      } else {
+        throw new Error('Compressed file not found');
+      }
+    } catch (gzErr) {
+      // Fall back to uncompressed JSON
+      const response = await fetch(`data/size_${n}.json`);
+      if (!response.ok) throw new Error('File not found');
+      trees = await response.json();
+      setStatus(`Found ${trees.length} isomers for C${n}H${2*n+2}`);
+    }
+    
     treesCache = trees;
-    setStatus(`Found ${trees.length} isomers for C${n}H${2*n+2}`);
     renderPage();
   } catch (err) {
     setStatus('Error loading data: ' + err.message);
